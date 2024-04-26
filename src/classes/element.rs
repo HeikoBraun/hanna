@@ -1,10 +1,9 @@
-use std::fmt;
-
 pub struct Element {
     pub library: String,
     pub filename: String,
     pub language: String,
 }
+
 impl Element {
     pub fn copy(&self) -> Element {
         Element {
@@ -15,6 +14,7 @@ impl Element {
     }
 }
 
+/*
 impl fmt::Display for Element {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -24,3 +24,4 @@ impl fmt::Display for Element {
         )
     }
 }
+*/

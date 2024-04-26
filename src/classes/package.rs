@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fmt;
 
 use log::warn;
 
@@ -65,6 +64,7 @@ impl Package {
     }
 }
 
+/*
 impl fmt::Display for Package {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -82,3 +82,4 @@ impl fmt::Display for Package {
         write!(f, "")
     }
 }
+*/

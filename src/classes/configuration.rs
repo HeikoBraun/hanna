@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::fmt;
+//use std::fmt;
 use std::process::exit;
 
 use log::error;
@@ -77,6 +77,7 @@ impl Configuration {
     }
 }
 
+/*
 impl fmt::Display for Configuration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -97,3 +98,4 @@ impl fmt::Display for Configuration {
         write!(f, "")
     }
 }
+*/

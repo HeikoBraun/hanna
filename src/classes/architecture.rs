@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fmt;
 
 use crate::*;
 use crate::classes::{ConfigurationInstance, Element, Instance, Library};
@@ -44,6 +43,7 @@ impl Architecture {
     }
 }
 
+/*
 impl fmt::Display for Architecture {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Architecture {} [{}])", self.name, self.filename)
@@ -61,3 +61,4 @@ impl fmt::Display for Architecture {
         write!(f, "")
     }
 }
+*/

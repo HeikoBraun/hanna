@@ -1,7 +1,9 @@
-use crate::classes::{Element, Library};
-use log::error;
 use std::collections::HashMap;
 use std::fmt;
+
+use log::error;
+
+use crate::classes::{Element, Library};
 
 pub struct ConfigurationInstance {
     pub library: String,
@@ -11,6 +13,7 @@ pub struct ConfigurationInstance {
     pub component: String,
     pub uses: Vec<String>,
 }
+
 impl ConfigurationInstance {
     pub fn resolve(&self, library: &String, libraries: &HashMap<String, Library>) -> Vec<Element> {
         let lib_name = if self.library == "work" {
@@ -29,6 +32,7 @@ impl ConfigurationInstance {
         Vec::new()
     }
 }
+
 
 impl fmt::Display for ConfigurationInstance {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

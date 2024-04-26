@@ -1,4 +1,4 @@
-use std::{fmt, fs};
+//use std::{fmt, fs};
 use std::collections::{HashMap, HashSet};
 
 use encoding::{DecoderTrap, Encoding};
@@ -537,6 +537,7 @@ impl Library {
     }
 }
 
+/*
 impl fmt::Display for Library {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "-------------------------------").expect("panic message library #50");
@@ -550,3 +551,4 @@ impl fmt::Display for Library {
         write!(f, "-------------------------------")
     }
 }
+*/

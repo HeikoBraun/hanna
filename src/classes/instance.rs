@@ -1,9 +1,11 @@
-use crate::classes::{ConfigurationInstance, Element, Library, RE_ENT, RE_ENT2};
-use log::{error, info, trace, warn};
-use regex::Regex;
 use std::collections::HashMap;
 use std::fmt;
 use std::process::exit;
+
+use log::{error, info, trace, warn};
+use regex::Regex;
+
+use crate::classes::{ConfigurationInstance, Element, Library, RE_ENT, RE_ENT2};
 
 pub struct Instance {
     pub label: String,
@@ -11,6 +13,7 @@ pub struct Instance {
     pub typ: String, // [component, entity, configuration]
     pub component: String,
 }
+
 impl Instance {
     pub fn resolve(
         &self,
@@ -187,6 +190,7 @@ impl Instance {
         ret
     }
 }
+
 
 impl fmt::Display for Instance {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

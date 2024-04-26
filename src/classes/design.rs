@@ -1,9 +1,10 @@
 use std::collections::HashMap;
-use std::fmt;
 
 use log::{error, warn};
 
 use crate::classes::{Architecture, ConfigurationInstance, Element, Entity, Library};
+
+//use std::fmt;
 
 pub struct Design {
     pub library: String,
@@ -67,6 +68,7 @@ impl Design {
     }
 }
 
+/*
 impl fmt::Display for Design {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Design: {}", self.name).expect("panic message design #31");
@@ -77,3 +79,4 @@ impl fmt::Display for Design {
         write!(f, "")
     }
 }
+*/

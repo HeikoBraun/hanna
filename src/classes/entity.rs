@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fmt;
 
 use crate::*;
 use crate::classes::{Element, Library};
@@ -28,6 +27,7 @@ impl Entity {
     }
 }
 
+/*
 impl fmt::Display for Entity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Entity {} [{}])", self.name, self.filename).expect("panic message entity #40");
@@ -40,3 +40,4 @@ impl fmt::Display for Entity {
         write!(f, "")
     }
 }
+*/
