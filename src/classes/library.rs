@@ -485,7 +485,7 @@ impl Library {
                 return Vec::from([el]);
             }
             error!(
-                "Can't resolve design {} in lib {}! (No architecture given)",
+                "Can't resolve design {} in library {}! (No architecture given)",
                 entity, self.name,
             );
             debug!(
@@ -497,7 +497,7 @@ impl Library {
         } else {
             match self.designs.get(&entity) {
                 None => {
-                    error!("Can't resolve design {} in lib {}!", entity, self.name,);
+                    error!("Can't resolve design {} in library {}!", entity, self.name,);
                     debug!(
                         "Available designs in library {}:\n    {}",
                         self.name,

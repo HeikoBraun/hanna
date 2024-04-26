@@ -55,7 +55,7 @@ impl Configuration {
         match lib.designs.get(&self.entity) {
             None => {
                 error!(
-                    "Error: Can't resolve design {} in lib {}!",
+                    "Error: Can't resolve design {} in library {}!",
                     self.entity, self.library
                 );
             }

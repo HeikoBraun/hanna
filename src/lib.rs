@@ -609,7 +609,14 @@ pub fn write_json_file(
     }
     res.insert("libraries".to_string(), lib_order);
     let content = serde_json::to_string_pretty(&res).unwrap_or(String::from(""));
-    let mut file = File::create(filename).unwrap();
+    // ToDo: Create directory if it does not exist!
+    let mut file = match File::create(filename) {
+        Ok(file) => { file }
+        Err(err) => {
+            eprintln!("Can't write to '{}'\n{}", filename, err);
+            exit(1);
+        }
+    };
     let _ = file.write(content.as_ref());
 }
 
@@ -889,20 +896,19 @@ exec_per_lib = [\"echo {{library}} verilog\"]"
 
 #[cfg(test)]
 mod tests {
-    /*#[test]
+    use std::collections::HashMap;
+
+    use crate::write_json_file;
+
+    #[test]
     fn test_filelist_design_1() {
-        let filename = String::from("tomls/libraries.toml");
+        let json_filename = String::from("files_design_1.json");
+        let libraries_toml_path = String::from("tomls/libraries.toml");
+        let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        let tool_config = read_tool_toml(&String::from("tomls/tools/echo.toml"), &replacements);
-
-        let libraries = read_libraries_toml(&filename, &replacements, &tool_config);
-
-        let lib = libraries.get("lib_1").unwrap();
-        let toplevel = String::from("design_1(rtl)");
-
-        let el_list = lib.resolve(&toplevel, &libraries);
-        assert_eq!(el_list.len(), 2);
-    }*/
+        write_json_file(String::from("lib_1"), String::from("lib_1.design_1(rtl)"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        assert_eq!(2, 2);
+    }
 
     #[test]
     fn test_has_to_pass() { assert_eq!(4, 4); }

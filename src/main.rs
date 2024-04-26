@@ -145,14 +145,24 @@ fn main() {
     match args.command.as_str() {
         "info" => {
             if lib_name.is_empty() {
-                debug!("Libs sorted: {:?}", get_library_names_from_toml(&args.libraries,&replacements));
+                let libs_list = get_library_names_from_toml(&args.libraries, &replacements);
+                if libs_list.is_empty() {
+                    println!("No libraries defined in {}", &args.libraries);
+                } else {
+                    println!("Libraries defined:\n - {}", libs_list.join("\n - "));
+                }
             } else {
-                println!(
-                    "Library {} contains following top levels:\n{}",
-                    lib_name,
-                    get_toplevels_from_lib(&lib_name, &args.libraries, &args.tool,
-                                           &replacements).join("\n")
-                )
+                let top_levels = get_toplevels_from_lib(&lib_name, &args.libraries, &args.tool,
+                                                        &replacements);
+                if top_levels.is_empty() {
+                    println!("No top levels found in library {}", lib_name);
+                } else {
+                    println!(
+                        "Library {} contains following top levels:\n - {}",
+                        lib_name,
+                        top_levels.join("\n - ")
+                    )
+                }
             }
         }
         _ => {
