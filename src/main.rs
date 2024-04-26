@@ -6,16 +6,13 @@ use clap::{CommandFactory, Parser};
 use env_logger::Target;
 use log::{debug, error, warn};
 
-use crate::classes::*;
-use crate::classes::aux_functions::{
-    gen_script, get_sorted_libraries, print_help_toml, read_libraries_toml, read_tool_toml,
-    run_script, write_json_file, write_lib_lists,
-};
+use hanna::{gen_script, get_library_names_from_toml, get_toplevels_from_lib, print_help_toml, run_script, write_json_file, write_lib_lists};
+use hanna::classes::RE_ENT;
+
 use crate::cli::ArgsStruct;
 use crate::cli::Cli;
 use crate::cli::Commands;
 
-pub mod classes;
 pub mod cli;
 
 fn main() {
@@ -30,7 +27,8 @@ fn main() {
     match cli_args.command {
         None => {
             if cli_args.about {
-                println!("Hanna is written by {}.\nSee https://github.com/HeikoBraun/hanna", clap::crate_authors!(", "));
+                //println!("Hanna is written by {}.\nSee https://github.com/HeikoBraun/hanna", clap::crate_authors!(", "));
+                println!("See https://github.com/HeikoBraun/hanna");
             } else if cli_args.help_toml {
                 print_help_toml();
             } else {
@@ -116,12 +114,9 @@ fn main() {
     }
 
     //
-    let tool_toml = read_tool_toml(&args.tool, &replacements);
-    //for (key, value) in &tool_toml.replacement {
-    //    replacements.insert(key.into(), value.into());
-    //}
+    //let tool_toml = read_tool_toml(&args.tool, &replacements);
     //
-    let libraries = read_libraries_toml(&args.libraries, &replacements, &tool_toml);
+    //let libraries = read_libraries_toml(&args.libraries, &replacements, &tool_toml);
     let lib_name: String;
 
     if args.command == "info" {
@@ -146,74 +141,33 @@ fn main() {
             }
         }
     };
-    let empty_lib = Library::new();
-    let lib = libraries.get(&*lib_name).unwrap_or_else(|| {
-        if lib_name.is_empty() {
-            &empty_lib
-        } else {
-            error!("library '{}' is unknown", lib_name);
-            exit(1)
-        }
-    });
 
     match args.command.as_str() {
         "info" => {
             if lib_name.is_empty() {
-                let mut libs: Vec<String> = Vec::new();
-                for (key, lib) in &libraries {
-                    if !lib.ignore {
-                        libs.push(key.clone());
-                    }
-                }
-                libs.sort();
-                println!("Available libraries:\n{}", libs.join("\n"));
-                for (key, lib) in &libraries {
-                    if !lib.ignore {
-                        debug!("Lib: {}: {:?}", key, lib.depends_on_libs);
-                    }
-                }
-                debug!("Libs sorted: {:?}", get_sorted_libraries(&libraries));
+                debug!("Libs sorted: {:?}", get_library_names_from_toml(&args.libraries,&replacements));
             } else {
                 println!(
                     "Library {} contains following top levels:\n{}",
                     lib_name,
-                    lib.list_designs().join("\n")
+                    get_toplevels_from_lib(&lib_name, &args.libraries, &args.tool,
+                                           &replacements).join("\n")
                 )
             }
         }
         _ => {
-            let mut el_list: Vec<Element> = Vec::new();
-            if !args.forces.is_empty() {
-                for force in &args.forces {
-                    let lib = match libraries.get(force) {
-                        None => {
-                            error!("library '{}' is unknown", force);
-                            exit(1)
-                        }
-                        Some(lib) => lib,
-                    };
-                    for el in &lib.all_verilog_elements {
-                        el_list.push(el.copy());
-                    }
-                    for el in &lib.all_vhdl_elements {
-                        el_list.push(el.copy());
-                    }
-                }
-            }
-            el_list.extend(lib.resolve(&args.toplevel, &libraries));
-            let lib_order = get_sorted_libraries(&libraries);
             match args.command.as_str() {
                 "files" => {
-                    write_lib_lists(&el_list, lib_order, &args.filename);
+                    write_lib_lists(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
                 }
                 "json" => {
-                    write_json_file(&el_list, lib_order, &args.filename);
+                    write_json_file(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
                 }
                 "script" => {
-                    gen_script(&el_list, lib_order, &args.filename, &tool_toml);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
                 }
                 "execute" => {
-                    gen_script(&el_list, lib_order, &args.filename, &tool_toml);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
                     run_script(&args.filename);
                 }
                 _ => {

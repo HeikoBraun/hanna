@@ -1,13 +1,15 @@
-use crate::classes::aux_functions::resolve_uses;
-use crate::classes::{Element, Library};
 use std::collections::HashMap;
 use std::fmt;
+
+use crate::*;
+use crate::classes::{Element, Library};
 
 pub struct Entity {
     pub name: String,
     pub filename: String,
     pub uses: Vec<String>,
 }
+
 impl Entity {
     pub fn add_use(&mut self, name: &String) {
         self.uses.push(name.to_string());

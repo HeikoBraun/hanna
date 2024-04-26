@@ -1,10 +1,11 @@
-use crate::classes::aux_functions::resolve_uses;
-use crate::classes::{Element, Library};
-use crate::ConfigurationInstance;
-use log::error;
 use std::collections::HashMap;
 use std::fmt;
 use std::process::exit;
+
+use log::error;
+
+use crate::*;
+use crate::classes::{ConfigurationInstance, Element, Library};
 
 pub struct Configuration {
     pub library: String,
@@ -83,7 +84,7 @@ impl fmt::Display for Configuration {
             "Configuration {} of {} of {} [{}]",
             self.name, self.entity, self.architecture, self.filename
         )
-        .expect("panic message configuration #10");
+            .expect("panic message configuration #10");
         if !self.uses.is_empty() || !self.instances.is_empty() {
             writeln!(f).expect("panic message configuration #11");
         }

@@ -1,8 +1,9 @@
-use crate::classes::aux_functions::{resolve_instances, resolve_uses};
-use crate::classes::{ConfigurationInstance, Element, Library};
-use crate::Instance;
 use std::collections::HashMap;
 use std::fmt;
+
+use crate::*;
+use crate::classes::{ConfigurationInstance, Element, Instance, Library};
+use crate::resolve_uses;
 
 pub struct Architecture {
     pub name: String,

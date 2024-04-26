@@ -1,11 +1,27 @@
-use crate::classes::aux_functions::pre_work_file_content;
-use crate::*;
-use encoding::all::ISO_8859_1;
+use std::{fmt, fs};
+use std::collections::{HashMap, HashSet};
+
 use encoding::{DecoderTrap, Encoding};
+use encoding::all::ISO_8859_1;
 use glob::glob;
 use log::{error, info, trace, warn};
-use std::collections::{HashMap, HashSet};
-use std::{fmt, fs};
+
+use crate::*;
+use crate::classes::Architecture;
+use crate::classes::Configuration;
+use crate::classes::Design;
+use crate::classes::Entity;
+use crate::classes::Package;
+use crate::classes::RE_CONF_COMP_SPEC;
+use crate::classes::RE_CONFIGURATION;
+use crate::classes::RE_ENT;
+use crate::classes::RE_ENT2;
+use crate::classes::RE_INSTANCE;
+use crate::classes::RE_LIBS;
+use crate::classes::RE_MODULE;
+use crate::classes::RE_PACKAGE;
+use crate::classes::RE_PACKAGE_BODY;
+use crate::classes::RE_USE;
 
 pub struct Library {
     pub name: String,

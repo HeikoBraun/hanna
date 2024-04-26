@@ -1,10 +1,9 @@
-use crate::classes::{ConfigurationInstance, Element, Library};
-use crate::Architecture;
-
-use crate::Entity;
-use log::{error, warn};
 use std::collections::HashMap;
 use std::fmt;
+
+use log::{error, warn};
+
+use crate::classes::{Architecture, ConfigurationInstance, Element, Entity, Library};
 
 pub struct Design {
     pub library: String,
@@ -12,6 +11,7 @@ pub struct Design {
     pub entity: Entity,
     pub architectures: HashMap<String, Architecture>,
 }
+
 impl Design {
     pub fn set_entity(&mut self, ent: Entity) {
         if !self.entity.name.is_empty() {

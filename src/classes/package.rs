@@ -1,8 +1,10 @@
-use crate::classes::aux_functions::resolve_uses;
-use crate::classes::{Element, Library};
-use log::warn;
 use std::collections::HashMap;
 use std::fmt;
+
+use log::warn;
+
+use crate::*;
+use crate::classes::{Element, Library};
 
 pub struct Package {
     pub name: String,
@@ -10,6 +12,7 @@ pub struct Package {
     pub body: String,
     pub uses: Vec<String>,
 }
+
 impl Package {
     pub fn set_header(&mut self, filename: &String) {
         if !self.header.is_empty() {
@@ -69,7 +72,7 @@ impl fmt::Display for Package {
             "Package {} with header [{}]  and body [{}])",
             self.name, self.header, self.body
         )
-        .expect("panic message package #60");
+            .expect("panic message package #60");
         if !self.uses.is_empty() {
             writeln!(f).expect("panic message package #61");
         }
