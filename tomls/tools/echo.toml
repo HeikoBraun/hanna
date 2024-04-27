@@ -4,7 +4,7 @@ common = ["echo", "{files}"]
 #exec_per_lib = ["echo mache {library}"]
 #replace = { "heiko" = "braun" }
 
-[vhdl]
+#[vhdl]
 #common = ["-v93"]
 #per_lib = ["-work {library}", "{mode}", "{files}"]
 #single_call = true

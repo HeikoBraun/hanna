@@ -1,0 +1,5 @@
+common = ["ghdl analyze"]
+
+[vhdl]
+common = ["--std=08"]
+per_lib = ["--work={library}", "{files}"]

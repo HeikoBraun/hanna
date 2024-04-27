@@ -1,0 +1,25 @@
+[*]
+[*] GTKWave Analyzer v3.3.114 (w)1999-2023 BSI
+[*] Sat Apr 27 18:49:00 2024
+[*]
+[dumpfile] "/home/heiko/RustProjects/hanna/sim/waves.vcd"
+[dumpfile_mtime] "Sat Apr 27 18:48:35 2024"
+[dumpfile_size] 1013
+[savefile] "/home/heiko/RustProjects/hanna/sim/waveform.gtkw"
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-25.932117 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 211
+[signals_width] 86
+[sst_expanded] 1
+[sst_vpaned_height] 143
+@28
+testbench.clk
+testbench.reset_n
+@22
+testbench.duv_i.a[3:0]
+testbench.duv_i.z[3:0]
+[pattern_trace] 1
+[pattern_trace] 0

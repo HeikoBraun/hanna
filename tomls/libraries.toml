@@ -1,5 +1,5 @@
 [lib_1]
-vhdl = ["rtl/lib_1/*.vhd"]
+vhdl = ["${HANNA_ROOT}/rtl/lib_1/*.vhd"]
 
 [lib_2]
-vhdl = ["rtl/lib_1/*.vhd"]
+vhdl = ["${HANNA_ROOT}/rtl/lib_1/*.vhd"]
