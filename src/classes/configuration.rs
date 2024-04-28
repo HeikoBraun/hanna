@@ -36,6 +36,7 @@ impl Configuration {
             instances: HashMap::new(),
         }
     }
+
     /*
     pub fn add_use(&mut self, name: &String) {
         self.uses.push(name.to_string());

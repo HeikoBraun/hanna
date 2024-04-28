@@ -932,6 +932,7 @@ mod tests {
 
     #[test]
     fn test_filelist_cfg_testbench_3() {
+        //env::set_var("RUST_LOG", "TRACE");
         let json_filename = String::from("files_cfg_testbench_3.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
