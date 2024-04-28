@@ -921,5 +921,25 @@ mod tests {
     }
 
     #[test]
+    fn test_filelist_cfg_testbench_2() {
+        let json_filename = String::from("files_cfg_testbench_2.json");
+        let libraries_toml_path = String::from("tomls/libraries.toml");
+        let tool_toml_path = String::from("tomls/tools/echo.toml");
+        let replacements: HashMap<String, String> = HashMap::new();
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_2"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        assert_eq!(2, 2);
+    }
+
+    #[test]
+    fn test_filelist_cfg_testbench_3() {
+        let json_filename = String::from("files_cfg_testbench_3.json");
+        let libraries_toml_path = String::from("tomls/libraries.toml");
+        let tool_toml_path = String::from("tomls/tools/echo.toml");
+        let replacements: HashMap<String, String> = HashMap::new();
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_3"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        assert_eq!(2, 2);
+    }
+
+    #[test]
     fn test_has_to_pass() { assert_eq!(4, 4); }
 }

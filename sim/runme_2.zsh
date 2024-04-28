@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 export HANNA_ROOT=${HOME}/RustProjects/hanna
-export top=cfg_testbench_1
+export top=cfg_testbench_2
 wavefile=waves.vcd
 #work=""
 work="--work=lib_1"

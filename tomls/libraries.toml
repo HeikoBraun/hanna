@@ -2,4 +2,7 @@
 vhdl = ["${HANNA_ROOT}/rtl/lib_1/*.vhd"]
 
 [lib_2]
-vhdl = ["${HANNA_ROOT}/rtl/lib_1/*.vhd"]
+vhdl = ["${HANNA_ROOT}/rtl/lib_2/*.vhd"]
+
+[lib_v]
+verilog = ["${HANNA_ROOT}/rtl/lib_v/*.v"]
