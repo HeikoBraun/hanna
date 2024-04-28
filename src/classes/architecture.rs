@@ -12,12 +12,13 @@ pub struct Architecture {
 }
 
 impl Architecture {
+    /*
     pub fn add_use(&mut self, name: &String) {
         self.uses.push(name.to_string());
     }
     pub fn extend_uses(&mut self, uses: Vec<String>) {
         self.uses.extend(uses.clone());
-    }
+    }*/
     pub fn resolve(
         &self,
         library: &String,

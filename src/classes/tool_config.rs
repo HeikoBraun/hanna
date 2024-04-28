@@ -1,5 +1,6 @@
-use crate::classes::ToolLangConfig;
 use std::collections::HashMap;
+
+use crate::classes::ToolLangConfig;
 
 pub struct ToolConfig {
     pub common: Vec<String>,
@@ -10,7 +11,7 @@ pub struct ToolConfig {
     pub exec_per_lib: Vec<String>,
     pub replacement: HashMap<String, String>,
 }
-
+/*
 impl Default for ToolConfig {
     fn default() -> Self {
         Self::new()
@@ -30,3 +31,4 @@ impl ToolConfig {
         }
     }
 }
+*/

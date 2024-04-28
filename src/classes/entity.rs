@@ -10,12 +10,13 @@ pub struct Entity {
 }
 
 impl Entity {
+    /*
     pub fn add_use(&mut self, name: &String) {
         self.uses.push(name.to_string());
     }
     pub fn extend_uses(&mut self, uses: Vec<String>) {
         self.uses.extend(uses.clone());
-    }
+    }*/
     pub fn resolve(&self, library: &String, libraries: &HashMap<String, Library>) -> Vec<Element> {
         let mut ret = resolve_uses(&self.uses, library, libraries);
         ret.push(Element {

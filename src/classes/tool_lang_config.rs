@@ -4,13 +4,13 @@ pub struct ToolLangConfig {
     pub single_call: bool,
     pub exec_per_lib: Vec<String>,
 }
-
+/*
 impl Default for ToolLangConfig {
     fn default() -> Self {
         Self::new()
     }
 }
-
+*/
 impl ToolLangConfig {
     pub fn new() -> ToolLangConfig {
         ToolLangConfig {

@@ -16,12 +16,13 @@ pub struct Configuration {
     pub uses: Vec<String>,
     pub instances: HashMap<String, ConfigurationInstance>,
 }
-
+/*
 impl Default for Configuration {
     fn default() -> Self {
         Self::new()
     }
 }
+*/
 
 impl Configuration {
     pub fn new() -> Configuration {
@@ -35,14 +36,14 @@ impl Configuration {
             instances: HashMap::new(),
         }
     }
-
+    /*
     pub fn add_use(&mut self, name: &String) {
         self.uses.push(name.to_string());
     }
     pub fn extend_uses(&mut self, uses: Vec<String>) {
         self.uses.extend(uses.clone());
     }
-
+    */
     pub fn resolve(&self, libraries: &HashMap<String, Library>) -> Vec<Element> {
         let mut ret = resolve_uses(&self.uses, &self.library, libraries);
         let lib = match libraries.get(&self.library) {

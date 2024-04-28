@@ -911,12 +911,12 @@ mod tests {
     }
 
     #[test]
-    fn test_filelist_cfg_design_1() {
-        let json_filename = String::from("files_cfg_design_1.json");
+    fn test_filelist_cfg_testbench_1() {
+        let json_filename = String::from("files_cfg_testbench_1.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_design_1"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_1"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
         assert_eq!(2, 2);
     }
 
