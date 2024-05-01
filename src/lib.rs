@@ -873,17 +873,17 @@ Others can be defined by 'replace = ...' (see below) or with the --replacement o
 
 Example:
 common = [\"echo\"]
-exec_before = [\"Mach was vorher\"]
-exec_after = [\"Mach was danach\"]
-exec_per_lib = [\"echo mache {{library}}\"]
-replace = {{ \"heiko\" = \"braun\" }}
+exec_before = [\"make something before\"]
+exec_after = [\"make something after\"]
+exec_per_lib = [\"echo make {{library}}\"]
+replace = {{ \"origin\" = \"replacement\" }}
 
 [vhdl]
 common = [\"-v93\"]
 per_lib = [\"-work {{library}}\", \"{{mode}}\", \"{{files}}\"]
 single_call = true
 exec_per_lib = [\"echo {{library}} vhdl\"]
-replace = {{ \"heiko2\" = \"braun2\" }}
+replace = {{ \"origin2\" = \"replacement2\" }}
 
 [verilog]
 common = [\"verilog_com1\"]
@@ -897,11 +897,14 @@ exec_per_lib = [\"echo {{library}} verilog\"]"
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+    use std::env;
+    use std::path::PathBuf;
 
     use crate::write_json_file;
 
     #[test]
     fn test_filelist_design_1() {
+        env::set_var("HANNA_ROOT", env::current_dir().unwrap_or(PathBuf::from("./")));
         let json_filename = String::from("files_design_1.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
