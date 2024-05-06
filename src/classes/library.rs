@@ -142,6 +142,7 @@ impl Library {
         let mut used_filenames: HashSet<String> = HashSet::new();
         for pattern in self.vhdl_scope.clone() {
             info!("Searching with glob pattern '{}'", pattern);
+            let mut found = false;
             for entry in glob(&pattern).expect("Failed to read glob pattern") {
                 match entry {
                     Ok(path) => {
@@ -153,7 +154,8 @@ impl Library {
                                     filename: filename.to_string(),
                                     language: String::from("vhdl"),
                                 });
-                                self.analyze_vhdl_file(filename)
+                                self.analyze_vhdl_file(filename);
+                                found = true;
                             } else {
                                 trace!("Ignoring duplicate glob entry {}", filename);
                             }
@@ -161,6 +163,9 @@ impl Library {
                     }
                     Err(e) => error!("{:?}", e),
                 }
+            }
+            if !found {
+                info!("    no files found!");
             }
         }
 

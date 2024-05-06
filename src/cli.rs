@@ -55,6 +55,10 @@ pub struct InfoCommands {
     /// path to tool.toml
     #[arg(short, long, default_value_t = String::from("tool.toml"))]
     pub tool: String,
+
+    /// only list, no prosa
+    #[arg(long, default_value_t = false)]
+    pub list_only: bool,
 }
 
 #[derive(Debug, Args)]
@@ -133,6 +137,10 @@ pub struct ScriptCommands {
     /// force to compile library in arbitrary order (could be useful if Verilog has needed submodules)
     #[arg(short, long)]
     pub force: Vec<String>,
+
+    /// compile toplevel to work instead original lib name
+    #[arg(long, default_value_t = false)]
+    pub work: bool,
 }
 
 pub struct ArgsStruct {
@@ -143,4 +151,6 @@ pub struct ArgsStruct {
     pub replacement: Vec<String>,
     pub filename: String,
     pub forces: Vec<String>,
+    pub list_only: bool,
+    pub use_work: bool,
 }

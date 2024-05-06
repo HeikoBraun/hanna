@@ -1,10 +1,11 @@
 use std::collections::HashMap;
+use std::env;
 use std::process::exit;
 use std::string::String;
 
 use clap::{CommandFactory, Parser};
 use env_logger::Target;
-use log::{debug, error, warn};
+use log::{debug, error, trace, warn};
 
 use hanna::{gen_script, get_library_names_from_toml, get_toplevels_from_lib, print_help_toml, run_script, write_json_file, write_lib_lists};
 use hanna::classes::RE_ENT;
@@ -20,6 +21,8 @@ fn main() {
         .target(Target::Stdout)
         .init();
 
+    //
+    trace!("called in {:?}",env::current_dir());
     //
     let cli_args = Cli::parse();
 
@@ -49,6 +52,8 @@ fn main() {
                         replacement: fc.replacement,
                         filename: String::new(),
                         forces: Vec::new(),
+                        list_only: fc.list_only,
+                        use_work: false,
                     }
                 }
                 Commands::Files(fc) => {
@@ -60,6 +65,8 @@ fn main() {
                         replacement: fc.replacement,
                         filename: fc.path,
                         forces: fc.force,
+                        list_only: false,
+                        use_work: false,
                     }
                 }
                 Commands::Json(jc) => {
@@ -71,6 +78,8 @@ fn main() {
                         replacement: jc.replacement,
                         filename: jc.name,
                         forces: jc.force,
+                        list_only: false,
+                        use_work: false,
                     }
                 }
                 Commands::Script(sc) => {
@@ -82,6 +91,8 @@ fn main() {
                         replacement: sc.replacement,
                         filename: sc.name,
                         forces: sc.force,
+                        list_only: false,
+                        use_work: sc.work,
                     }
                 }
                 Commands::Execute(sc) => {
@@ -93,6 +104,8 @@ fn main() {
                         replacement: sc.replacement,
                         filename: sc.name,
                         forces: sc.force,
+                        list_only: false,
+                        use_work: sc.work,
                     }
                 }
             };
@@ -146,7 +159,9 @@ fn main() {
         "info" => {
             if lib_name.is_empty() {
                 let libs_list = get_library_names_from_toml(&args.libraries, &replacements);
-                if libs_list.is_empty() {
+                if args.list_only {
+                    println!("{}", libs_list.join("\n"));
+                } else if libs_list.is_empty() {
                     println!("No libraries defined in {}", &args.libraries);
                 } else {
                     println!("Libraries defined:\n - {}", libs_list.join("\n - "));
@@ -174,10 +189,10 @@ fn main() {
                     write_json_file(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
                 }
                 "script" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work);
                 }
                 "execute" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work);
                     run_script(&args.filename);
                 }
                 _ => {
