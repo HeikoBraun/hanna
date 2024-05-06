@@ -4,7 +4,9 @@ pub struct Element {
     pub language: String,
 }
 
+
 impl Element {
+    /*
     pub fn copy(&self) -> Element {
         Element {
             library: self.library.clone(),
@@ -12,7 +14,10 @@ impl Element {
             language: self.language.clone(),
         }
     }
+    */
 }
+
+
 
 /*
 impl fmt::Display for Element {

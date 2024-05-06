@@ -110,11 +110,13 @@ pub static RE_ENT: Lazy<Regex> = Lazy::new(|| {
 pub static RE_ENT2: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?P<lib>\w+)\.(?P<rest>.*)").unwrap()
 });
+/*
 pub static RE_DESIGN: Lazy<Regex> = Lazy::new(|| {
     Regex::new(
         r"(?imsx)((?P<lib>\w+)\.)?((?P<configuration>\w+)|((?P<entity>\w+)\((?P<arch>\w+)\)))",
     ).unwrap()
 });
+*/
 
 pub static RE_USAGE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?imsx)(?P<lib>\w+)\.(?P<package>\w+)(\.(?P<element>\w+))?").unwrap()
@@ -123,10 +125,12 @@ pub static RE_USAGE: Lazy<Regex> = Lazy::new(|| {
 pub static RE_MODULE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?imsx)\bmodule\s+(?P<name>\w+)").unwrap()
 });
-
+/*
 pub static RE_MODULE_INST: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?imsx)\b(?P<name>\w+)\s+\w+\s+\(").unwrap()
 });
+*/
+
 pub static RE_ENVVAR: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"\$((?P<var1>\w+)|(\{(?P<var2>[^}]+?)}))").unwrap()
 });

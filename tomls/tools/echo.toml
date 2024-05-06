@@ -1,12 +1,12 @@
-common = ["echo", "{files}"]
+common = ["echo"]
 #exec_before = ["Mach was vorher"]
 #exec_after = ["Mach was danach"]
 #exec_per_lib = ["echo mache {library}"]
 #replace = { "heiko" = "braun" }
 
-#[vhdl]
-#common = ["-v93"]
-#per_lib = ["-work {library}", "{mode}", "{files}"]
+[vhdl]
+common = ["-v93"]
+per_lib = ["-work {library}", "{files}"]
 #single_call = true
 #exec_per_lib = ["echo {library} vhdl"]
 #replace = { "heiko2" = "braun2" }

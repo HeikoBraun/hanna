@@ -36,14 +36,16 @@ pub struct Library {
     pub all_vhdl_elements: Vec<Element>,
     pub all_verilog_elements: Vec<Element>,
 }
-
+/*
 impl Default for Library {
     fn default() -> Self {
         Self::new()
     }
 }
+*/
 
 impl Library {
+    /*
     pub fn new() -> Library {
         Library {
             name: "".to_string(),
@@ -59,7 +61,9 @@ impl Library {
             all_verilog_elements: Vec::new(),
         }
     }
+    */
 
+    /*
     pub fn print(&self) {
         println!("---------------------------------------------------");
         println!("Library {}", self.name);
@@ -68,10 +72,14 @@ impl Library {
         }
         println!("---------------------------------------------------");
     }
+    */
 
+    /*
     pub fn has_design(&self, name: &String) -> bool {
         return self.designs.get(name).is_some();
     }
+    */
+
     pub fn get_design(&mut self, name: &String) -> &mut Design {
         match self.designs.get_mut(name) {
             Some(_) => {}
@@ -89,15 +97,16 @@ impl Library {
                 self.designs.insert(name.to_string(), d);
             }
         }
-        self.designs.get_mut(name).unwrap_or_else(|| {
-            eprintln!("Can't happen! #487535");
-            exit(1)
-        })
+        self.designs.get_mut(name).unwrap() // Must exist now!
     }
 
+    /*
     pub fn has_configuration(&self, name: &String) -> bool {
         return self.configurations.get(name).is_some();
     }
+
+     */
+    /*
     pub fn get_configuration(&mut self, name: &String) -> &mut Configuration {
         match self.configurations.get(name) {
             Some(_) => {}
@@ -107,11 +116,10 @@ impl Library {
                 self.configurations.insert(name.to_string(), c);
             }
         }
-        self.configurations.get_mut(name).unwrap_or_else(|| {
-            eprintln!("Can't happen! #2345786245");
-            exit(1)
-        })
+        self.configurations.get_mut(name).unwrap() // Must exist now
     }
+
+     */
     pub fn has_package(&self, name: &String) -> bool {
         return self.packages.get(name).is_some();
     }
@@ -128,10 +136,7 @@ impl Library {
                 self.packages.insert(name.to_string(), p);
             }
         }
-        self.packages.get_mut(name).unwrap_or_else(|| {
-            eprintln!("Can't happen! #3459827455");
-            exit(1)
-        })
+        self.packages.get_mut(name).unwrap() // Must exist now!
     }
 
     pub fn analyze(&mut self) {

@@ -45,6 +45,7 @@ impl Package {
     pub fn extend_uses(&mut self, uses: Vec<String>) {
         self.uses.extend(uses.clone());
     }
+    
     pub fn resolve(&self, library: &String, libraries: &HashMap<String, Library>) -> Vec<Element> {
         let mut ret = resolve_uses(&self.uses, library, libraries);
         // package itself
