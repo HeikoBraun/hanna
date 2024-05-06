@@ -59,6 +59,7 @@ pub struct InfoCommands {
     /// only list, no prosa
     #[arg(long, default_value_t = false)]
     pub list_only: bool,
+
 }
 
 #[derive(Debug, Args)]
@@ -85,6 +86,10 @@ pub struct FilesCommands {
     /// force to compile library in arbitrary order (could be useful if Verilog has needed submodules)
     #[arg(short, long)]
     pub force: Vec<String>,
+
+    /// ignore library
+    #[arg(long)]
+    pub ignore_library: Vec<String>,
 }
 
 #[derive(Debug, Args)]
@@ -111,6 +116,10 @@ pub struct JSONCommands {
     /// force to compile library in arbitrary order (could be useful if Verilog has needed submodules)
     #[arg(short, long)]
     pub force: Vec<String>,
+
+    /// ignore library
+    #[arg(long)]
+    pub ignore_library: Vec<String>,
 }
 
 #[derive(Debug, Args)]
@@ -141,6 +150,10 @@ pub struct ScriptCommands {
     /// compile toplevel to work instead original lib name
     #[arg(long, default_value_t = false)]
     pub work: bool,
+
+    /// ignore library
+    #[arg(long)]
+    pub ignore_library: Vec<String>,
 }
 
 pub struct ArgsStruct {
@@ -153,4 +166,5 @@ pub struct ArgsStruct {
     pub forces: Vec<String>,
     pub list_only: bool,
     pub use_work: bool,
+    pub ignore_library: Vec<String>,
 }

@@ -514,17 +514,23 @@ pub fn get_tool_lang_config(filename: &String, lang: &String, table: &Table) -> 
 }
 
 pub fn get_element_list(lib_name: String, toplevel: String, libraries_toml_filename: &String, tool_toml_filename: &String,
-                        replacements: &HashMap<String, String>, ) -> (Vec<Element>, HashMap<String, Library>) {
+                        replacements: &HashMap<String, String>,
+                        ignore_libraries: &Vec<String>, ) -> (Vec<Element>, HashMap<String, Library>) {
     let tool_config = read_tool_toml(tool_toml_filename, &replacements);
     let mut replacements_all = replacements.clone();
     for (key, value) in &tool_config.replacement {
         replacements_all.insert(key.clone(), value.clone());
     }
-    let libs = read_libraries_toml(
+    let mut libs = read_libraries_toml(
         &libraries_toml_filename,
         &replacements_all,
         &tool_config,
     );
+    for (lib_name, lib) in &mut libs {
+        if ignore_libraries.contains(&lib_name) {
+            lib.ignore = true;
+        }
+    }
     match libs.get(&lib_name) {
         None => {
             error!("A lib with name {} is not defined!",lib_name);
@@ -537,8 +543,9 @@ pub fn get_element_list(lib_name: String, toplevel: String, libraries_toml_filen
 pub fn write_lib_lists(
     lib_name: String, toplevel: String, libraries_toml_filename: &String, tool_toml_filename: &String,
     replacements: &HashMap<String, String>, filename: &String,
+    ignore_libraries: &Vec<String>,
 ) {
-    let (element_list, libraries) = get_element_list(lib_name, toplevel, libraries_toml_filename, tool_toml_filename, replacements);
+    let (element_list, libraries) = get_element_list(lib_name, toplevel, libraries_toml_filename, tool_toml_filename, replacements, ignore_libraries);
     let lib_order = get_sorted_libraries(&libraries);
     let mut l_path = String::from(filename.strip_suffix('/').unwrap_or(&*filename));
     l_path.push('/');
@@ -585,8 +592,9 @@ pub fn write_lib_lists(
 pub fn write_json_file(
     lib_name: String, toplevel: String, libraries_toml_filename: &String, tool_toml_filename: &String,
     replacements: &HashMap<String, String>, filename: &String,
+    ignore_libraries: &Vec<String>,
 ) {
-    let (element_list, libraries) = get_element_list(lib_name, toplevel, libraries_toml_filename, tool_toml_filename, replacements);
+    let (element_list, libraries) = get_element_list(lib_name, toplevel, libraries_toml_filename, tool_toml_filename, replacements, ignore_libraries);
     let lib_order = get_sorted_libraries(&libraries);
     let mut l_path = String::from(filename.strip_suffix('/').unwrap_or(&*filename));
     l_path.push('/');
@@ -632,9 +640,10 @@ pub fn gen_script(
     lib_name: String, toplevel: String, libraries_toml_filename: &String, tool_toml_filename: &String,
     replacements: &HashMap<String, String>, filename: &String,
     use_work: bool,
+    ignore_libraries: &Vec<String>,
 ) {
     let top_lib_name = lib_name;
-    let (element_list, libraries) = get_element_list(top_lib_name.clone(), toplevel, libraries_toml_filename, tool_toml_filename, replacements);
+    let (element_list, libraries) = get_element_list(top_lib_name.clone(), toplevel, libraries_toml_filename, tool_toml_filename, replacements, ignore_libraries);
     let lib_order = get_sorted_libraries(&libraries);
     let tool_config = read_tool_toml(tool_toml_filename, &replacements);
     let mut l_path = String::from(filename.strip_suffix('/').unwrap_or(&*filename));

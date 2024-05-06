@@ -54,6 +54,7 @@ fn main() {
                         forces: Vec::new(),
                         list_only: fc.list_only,
                         use_work: false,
+                        ignore_library: Vec::new(),
                     }
                 }
                 Commands::Files(fc) => {
@@ -67,6 +68,7 @@ fn main() {
                         forces: fc.force,
                         list_only: false,
                         use_work: false,
+                        ignore_library: fc.ignore_library,
                     }
                 }
                 Commands::Json(jc) => {
@@ -80,6 +82,7 @@ fn main() {
                         forces: jc.force,
                         list_only: false,
                         use_work: false,
+                        ignore_library: jc.ignore_library,
                     }
                 }
                 Commands::Script(sc) => {
@@ -93,6 +96,7 @@ fn main() {
                         forces: sc.force,
                         list_only: false,
                         use_work: sc.work,
+                        ignore_library: sc.ignore_library,
                     }
                 }
                 Commands::Execute(sc) => {
@@ -106,6 +110,7 @@ fn main() {
                         forces: sc.force,
                         list_only: false,
                         use_work: sc.work,
+                        ignore_library: sc.ignore_library,
                     }
                 }
             };
@@ -167,8 +172,7 @@ fn main() {
                     println!("Libraries defined:\n - {}", libs_list.join("\n - "));
                 }
             } else {
-                let top_levels = get_toplevels_from_lib(&lib_name, &args.libraries, &args.tool,
-                                                        &replacements);
+                let top_levels = get_toplevels_from_lib(&lib_name, &args.libraries, &args.tool, &replacements);
                 if top_levels.is_empty() {
                     println!("No top levels found in library {}", lib_name);
                 } else {
@@ -183,16 +187,16 @@ fn main() {
         _ => {
             match args.command.as_str() {
                 "files" => {
-                    write_lib_lists(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
+                    write_lib_lists(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_library);
                 }
                 "json" => {
-                    write_json_file(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename);
+                    write_json_file(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_library);
                 }
                 "script" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_library);
                 }
                 "execute" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_library);
                     run_script(&args.filename);
                 }
                 _ => {
