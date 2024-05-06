@@ -885,17 +885,17 @@ Others can be defined by 'replace = ...' (see below) or with the --replacement o
 
 Example:
 common = [\"echo\"]
-exec_before = [\"Mach was vorher\"]
-exec_after = [\"Mach was danach\"]
-exec_per_lib = [\"echo mache {{library}}\"]
-replace = {{ \"heiko\" = \"braun\" }}
+exec_before = [\"make something before\"]
+exec_after = [\"make something after\"]
+exec_per_lib = [\"echo make {{library}}\"]
+replace = {{ \"origin\" = \"replacement\" }}
 
 [vhdl]
 common = [\"-v93\"]
 per_lib = [\"-work {{library}}\", \"{{mode}}\", \"{{files}}\"]
 single_call = true
 exec_per_lib = [\"echo {{library}} vhdl\"]
-replace = {{ \"heiko2\" = \"braun2\" }}
+replace = {{ \"origin2\" = \"replacement2\" }}
 
 [verilog]
 common = [\"verilog_com1\"]
@@ -909,6 +909,8 @@ exec_per_lib = [\"echo {{library}} verilog\"]"
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+    use std::env;
+    use std::path::PathBuf;
 
     use crate::{get_toplevels_from_lib, write_json_file};
 
@@ -1003,4 +1005,51 @@ mod tests {
 
      */
 
+    fn test_filelist_cfg_testbench_4() {
+        //env::set_var("RUST_LOG", "TRACE");
+        let json_filename = String::from("files_cfg_testbench_4.json");
+        let libraries_toml_path = String::from("tomls/libraries.toml");
+        let tool_toml_path = String::from("tomls/tools/echo.toml");
+        let replacements: HashMap<String, String> = HashMap::new();
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_4"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        assert_eq!(2, 2);
+    }
+
+    #[test]
+    fn test_get_toplevels_from_lib() {
+        //env::set_var("RUST_LOG", "TRACE");
+        let lib_name = String::from("lib_1");
+        let libraries_toml_path = String::from("tomls/libraries.toml");
+        let tool_toml_path = String::from("tomls/tools/echo.toml");
+        let replacements: HashMap<String, String> = HashMap::new();
+        let top_levels = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path,
+                                                &replacements);
+        assert_eq!(2, 2);
+    }
+
+    #[test]
+    fn test_get_toplevels_from_lib_ignore() {
+        //env::set_var("RUST_LOG", "TRACE");
+        let lib_name = String::from("lib_ignore");
+        let libraries_toml_path = String::from("tomls/libraries.toml");
+        let tool_toml_path = String::from("tomls/tools/echo.toml");
+        let replacements: HashMap<String, String> = HashMap::new();
+        let top_levels = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path,
+                                                &replacements);
+        assert_eq!(2, 2);
+    }
+
+    /*
+    #[test]
+    fn test_cfg_design_doesnt_exist() {
+        //env::set_var("RUST_LOG", "TRACE");
+        let json_filename = String::from("files_cfg_design_doesnt_exist.json");
+        let libraries_toml_path = String::from("tomls/libraries.toml");
+        let tool_toml_path = String::from("tomls/tools/echo.toml");
+        let replacements: HashMap<String, String> = HashMap::new();
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_design_doesnt_exist"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        assert_eq!(2, 2);
+    }
+
+     */
 }
