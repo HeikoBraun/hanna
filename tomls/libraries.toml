@@ -6,3 +6,6 @@ vhdl = ["${HANNA_ROOT}/rtl/lib_2/*.vhd"]
 
 [lib_v]
 verilog = ["${HANNA_ROOT}/rtl/lib_v/*.v"]
+
+[lib_ignore]
+ignore = true

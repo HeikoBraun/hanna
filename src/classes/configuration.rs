@@ -25,6 +25,7 @@ impl Default for Configuration {
 */
 
 impl Configuration {
+    /*
     pub fn new() -> Configuration {
         Configuration {
             library: "".to_string(),
@@ -36,6 +37,8 @@ impl Configuration {
             instances: HashMap::new(),
         }
     }
+    
+     */
 
     /*
     pub fn add_use(&mut self, name: &String) {
