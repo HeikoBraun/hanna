@@ -309,6 +309,45 @@ pub fn read_toml(filename: &String, replacements: &HashMap<String, String>) -> T
     })
 }
 
+pub fn read_toml_as_map(filename: &String, replacements: &HashMap<String, String>) -> HashMap<String, String> {
+    trace!("{}: {:#?}", filename, replacements);
+    let mut file = match File::open(filename) {
+        Ok(file) => file,
+        Err(why) => {
+            error!("Couldn't open '{}': {}", filename, why);
+            exit(1);
+        }
+    };
+    let mut contents = String::new();
+    match file.read_to_string(&mut contents) {
+        Ok(contents) => contents,
+        Err(why) => {
+            error!("Couldn't read '{}': {}", filename, why);
+            exit(1);
+        }
+    };
+    // replace env vars
+    contents = RE_ENVVAR
+        .replace_all(contents.as_str(), EnvReplacer)
+        .parse()
+        .unwrap();
+    // replace other vars in <var> or in {var}
+    for (orig, replacement) in replacements {
+        let mut tmp = String::from("{");
+        tmp.push_str(orig);
+        tmp.push('}');
+        debug!("TOML: replacement: {} -> {}", orig, replacement);
+        contents = contents.replace(&tmp, replacement);
+    }
+    //
+    let hm: HashMap<String, String> = toml::from_str(&*contents).unwrap();
+    hm
+    /*contents.parse::<HashMap<String, String>>().unwrap_or_else(|err| {
+        error!("{}", err);
+        exit(1)
+    })*/
+}
+
 pub fn read_tool_toml(filename: &String, replacements: &HashMap<String, String>) -> ToolConfig {
     let config = read_toml(filename, replacements);
 
@@ -504,12 +543,47 @@ pub fn get_tool_lang_config(filename: &String, lang: &String, table: &Table) -> 
             }
         }
     }
+    let mut options: HashMap<String, String> = HashMap::new();
+    if let Some(o) = table.get("options") {
+        match o {
+            Value::Table(ot) => {
+                for (key, value) in ot {
+                    match value {
+                        Value::String(s) => {
+                            options.insert(key.clone(), s.clone());
+                        }
+                        Value::Array(a) => {
+                            let mut tmp_s: Vec<String> = Vec::new();
+                            for e in a {
+                                match e {
+                                    Value::String(s) => {
+                                        tmp_s.push(s.clone())
+                                    }
+                                    _ => {
+                                        eprintln!("Code 42 #1!");
+                                        exit(1);
+                                    }
+                                }
+                            }
+                            options.insert(key.clone(), tmp_s.join(" "));
+                        }
+                        _ => {
+                            eprintln!("Code 42 #2!");
+                            exit(1);
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
 
     ToolLangConfig {
         common,
         per_lib,
         single_call,
         exec_per_lib,
+        options,
     }
 }
 
@@ -641,6 +715,7 @@ pub fn gen_script(
     replacements: &HashMap<String, String>, filename: &String,
     use_work: bool,
     ignore_libraries: &Vec<String>,
+    arg_options: &Vec<String>,
 ) {
     let top_lib_name = lib_name;
     let (element_list, libraries) = get_element_list(top_lib_name.clone(), toplevel, libraries_toml_filename, tool_toml_filename, replacements, ignore_libraries);
@@ -739,6 +814,24 @@ pub fn gen_script(
                         common.push(String::from(" \\\n    "))
                     }
                 }
+                // options
+                for option in arg_options {
+                    let lang_options =
+                        if lang == "vhdl" {
+                            &tool_config.vhdl.options
+                        } else {
+                            &tool_config.verilog.options
+                        };
+                    if let Some(opt) = lang_options.get(option) {
+                        common.push(opt.clone());
+                        if *single_call {
+                            common.push(String::from(" \\"))
+                        } else {
+                            common.push(String::from(" \\\n    "))
+                        }
+                    };
+                }
+
                 //
                 if *single_call {
                     content.push(common.join(""));

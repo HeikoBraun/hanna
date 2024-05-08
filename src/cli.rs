@@ -154,6 +154,10 @@ pub struct ScriptCommands {
     /// ignore library
     #[arg(long)]
     pub ignore_library: Vec<String>,
+
+    /// activate options
+    #[arg(long)]
+    pub option: Vec<String>,
 }
 
 pub struct ArgsStruct {
@@ -161,10 +165,11 @@ pub struct ArgsStruct {
     pub toplevel: String,
     pub libraries: String,
     pub tool: String,
-    pub replacement: Vec<String>,
+    pub replacements: Vec<String>,
     pub filename: String,
     pub forces: Vec<String>,
     pub list_only: bool,
     pub use_work: bool,
-    pub ignore_library: Vec<String>,
+    pub ignore_libraries: Vec<String>,
+    pub options: Vec<String>,
 }

@@ -49,12 +49,13 @@ fn main() {
                         toplevel: fc.library,
                         libraries: fc.libraries,
                         tool: fc.tool,
-                        replacement: fc.replacement,
+                        replacements: fc.replacement,
                         filename: String::new(),
                         forces: Vec::new(),
                         list_only: fc.list_only,
                         use_work: false,
-                        ignore_library: Vec::new(),
+                        ignore_libraries: Vec::new(),
+                        options: Vec::new(),
                     }
                 }
                 Commands::Files(fc) => {
@@ -63,12 +64,13 @@ fn main() {
                         toplevel: fc.toplevel,
                         libraries: fc.libraries,
                         tool: fc.tool,
-                        replacement: fc.replacement,
+                        replacements: fc.replacement,
                         filename: fc.path,
                         forces: fc.force,
                         list_only: false,
                         use_work: false,
-                        ignore_library: fc.ignore_library,
+                        ignore_libraries: fc.ignore_library,
+                        options: Vec::new(),
                     }
                 }
                 Commands::Json(jc) => {
@@ -77,12 +79,13 @@ fn main() {
                         toplevel: jc.toplevel,
                         libraries: jc.libraries,
                         tool: jc.tool,
-                        replacement: jc.replacement,
+                        replacements: jc.replacement,
                         filename: jc.name,
                         forces: jc.force,
                         list_only: false,
                         use_work: false,
-                        ignore_library: jc.ignore_library,
+                        ignore_libraries: jc.ignore_library,
+                        options: Vec::new(),
                     }
                 }
                 Commands::Script(sc) => {
@@ -91,12 +94,13 @@ fn main() {
                         toplevel: sc.toplevel,
                         libraries: sc.libraries,
                         tool: sc.tool,
-                        replacement: sc.replacement,
+                        replacements: sc.replacement,
                         filename: sc.name,
                         forces: sc.force,
                         list_only: false,
                         use_work: sc.work,
-                        ignore_library: sc.ignore_library,
+                        ignore_libraries: sc.ignore_library,
+                        options: sc.option,
                     }
                 }
                 Commands::Execute(sc) => {
@@ -105,12 +109,13 @@ fn main() {
                         toplevel: sc.toplevel,
                         libraries: sc.libraries,
                         tool: sc.tool,
-                        replacement: sc.replacement,
+                        replacements: sc.replacement,
                         filename: sc.name,
                         forces: sc.force,
                         list_only: false,
                         use_work: sc.work,
-                        ignore_library: sc.ignore_library,
+                        ignore_libraries: sc.ignore_library,
+                        options: sc.option,
                     }
                 }
             };
@@ -119,7 +124,7 @@ fn main() {
 
     //
     let mut replacements: HashMap<String, String> = HashMap::new();
-    for replacement in args.replacement {
+    for replacement in args.replacements {
         let parts: Vec<&str> = replacement.split('=').collect();
         if parts.len() == 2 {
             replacements.insert(parts[0].to_string(), parts[1].to_string());
@@ -187,16 +192,16 @@ fn main() {
         _ => {
             match args.command.as_str() {
                 "files" => {
-                    write_lib_lists(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_library);
+                    write_lib_lists(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_libraries);
                 }
                 "json" => {
-                    write_json_file(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_library);
+                    write_json_file(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_libraries);
                 }
                 "script" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_library);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_libraries, &args.options);
                 }
                 "execute" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_library);
+                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_libraries, &args.options);
                     run_script(&args.filename);
                 }
                 _ => {

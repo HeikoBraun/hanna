@@ -7,6 +7,8 @@ common = ["echo"]
 [vhdl]
 common = ["-v93"]
 per_lib = ["-work {library}", "{files}"]
+options.debug = ["--all"]
+options.coverage = ["--cover"]
 #single_call = true
 #exec_per_lib = ["echo {library} vhdl"]
 #replace = { "heiko2" = "braun2" }

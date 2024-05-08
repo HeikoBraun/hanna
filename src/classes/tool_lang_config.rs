@@ -1,8 +1,11 @@
+use std::collections::HashMap;
+
 pub struct ToolLangConfig {
     pub common: Vec<String>,
     pub per_lib: Vec<String>,
     pub single_call: bool,
     pub exec_per_lib: Vec<String>,
+    pub options: HashMap<String, String>,
 }
 /*
 impl Default for ToolLangConfig {
@@ -18,6 +21,7 @@ impl ToolLangConfig {
             per_lib: Vec::new(),
             single_call: false,
             exec_per_lib: Vec::new(),
+            options: HashMap::new(),
         }
     }
 }
