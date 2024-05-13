@@ -9,10 +9,11 @@ use clap::{Args, Parser, Subcommand};
 Analyzes VHDL files of the libraries defined in libraries.toml.\n\
 It can create a compile script or some file lists files.")]
 pub struct Cli {
-    #[arg(long, global = true, hide = true, alias = "author")]
+    //#[arg(long, global = true, hide = true, alias = "author")]
+    #[arg(long, global = true, help = "about this program")]
     pub about: bool,
 
-    #[arg(long, global = true)]
+    #[arg(long, global = true, help = "help for toml format")]
     pub help_toml: bool,
 
     #[command(subcommand)]
@@ -21,19 +22,19 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    // info which designs are in library
+    /// info which designs are in library
     Info(InfoCommands),
 
-    // file lists
+    /// create file lists
     Files(FilesCommands),
 
-    // json file
+    /// create json file
     Json(JSONCommands),
 
-    // script
+    /// generate compile script
     Script(ScriptCommands),
 
-    // execute: not yet, generate script and execute
+    /// execute: generate script and execute
     Execute(ScriptCommands),
     // tree: not yet
     //Tree(FilesCommands),
