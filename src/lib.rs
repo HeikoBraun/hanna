@@ -10,10 +10,11 @@ use regex::{Captures, Replacer};
 use toml::{Table, Value};
 
 use crate::classes::{
-    ConfigurationInstance, Element, Instance, Library, RE_ARCHITECTURE, RE_COMMENT, RE_ENTITY,
-    RE_ENVVAR, RE_FUNC_PROC, RE_GENERATE, RE_PROCESS, RE_SIGNAL_OR_VARIABLE, RE_STD_LIBS, RE_USAGE,
-    RE_USE_STD_LIBS, ToolLangConfig,
+    ConfigurationInstance, Element, Instance, Library, RE_ARCHITECTURE, RE_COMMENT,
+    RE_ENTITY, RE_ENVVAR, RE_FUNC_PROC, RE_GENERATE, RE_PROCESS, RE_SIGNAL_OR_VARIABLE, RE_STD_LIBS,
+    RE_USAGE, RE_USE_STD_LIBS, ToolLangConfig,
 };
+use crate::classes::constants::KNOWN_LANGUAGES;
 use crate::classes::tool_config::ToolConfig;
 
 pub mod classes;
@@ -168,8 +169,7 @@ pub fn read_libraries_toml(
     let config = read_toml(filename, &replacements_all);
     for (name, value) in config {
         let ignore: bool;
-        let mut vhdl_scope: Vec<String> = Vec::new();
-        let mut verilog_scope: Vec<String> = Vec::new();
+        let mut scopes: HashMap<String, Vec<String>> = HashMap::new();
         match value {
             Value::Table(t) => {
                 if let Some(v) = t.get("ignore") {
@@ -183,34 +183,23 @@ pub fn read_libraries_toml(
                 } else {
                     ignore = false
                 }
-                if let Some(v) = t.get("vhdl") {
-                    match v {
-                        Value::Array(l) => {
-                            for e in l {
-                                vhdl_scope
-                                    .push(rework_file_path(String::from(e.as_str().unwrap_or(""))));
+                for lang in KNOWN_LANGUAGES {
+                    if let Some(v) = t.get(lang) {
+                        match v {
+                            Value::Array(l) => {
+                                let mut scope: Vec<String> = Vec::new();
+                                for e in l {
+                                    scope.push(rework_file_path(String::from(e.as_str().unwrap_or(""))));
+                                }
+                                scopes.insert(String::from(lang), scope);
+                            }
+                            _ => {
+                                error!("TOML libraries: '{}' must be a list of strings!", lang);
+                                exit(1)
                             }
                         }
-                        _ => {
-                            error!("TOML libraries: 'vhdl' must be a list of strings!");
-                            exit(1)
-                        }
-                    }
-                };
-                if let Some(v) = t.get("verilog") {
-                    match v {
-                        Value::Array(l) => {
-                            for e in l {
-                                verilog_scope
-                                    .push(rework_file_path(String::from(e.as_str().unwrap_or(""))));
-                            }
-                        }
-                        _ => {
-                            error!("TOML libraries: 'verilog' must be a list of strings!");
-                            exit(1)
-                        }
-                    }
-                };
+                    };
+                }
             }
             _ => {
                 error!("Unknown error #134415");
@@ -225,10 +214,8 @@ pub fn read_libraries_toml(
             modules: HashMap::new(),
             depends_on_libs: Vec::new(),
             ignore,
-            vhdl_scope,
-            verilog_scope,
-            all_vhdl_elements: Vec::new(),
-            all_verilog_elements: Vec::new(),
+            scopes,
+            all_elements: HashMap::new(),
         };
         lib.analyze();
         ret.insert(name, lib);
@@ -353,8 +340,7 @@ pub fn read_tool_toml(filename: &String, replacements: &HashMap<String, String>)
 
     /////////////////////////////////////////////////////////////////////////////////
     let mut common: Vec<String> = Vec::new();
-    let mut vhdl_cfg = ToolLangConfig::new();
-    let mut verilog_cfg = ToolLangConfig::new();
+    let mut lang_configs: HashMap<String, ToolLangConfig> = HashMap::new();
     let mut exec_before: Vec<String> = Vec::new();
     let mut exec_after: Vec<String> = Vec::new();
     let mut exec_per_lib: Vec<String> = Vec::new();
@@ -438,7 +424,8 @@ pub fn read_tool_toml(filename: &String, replacements: &HashMap<String, String>)
         }
     }
 
-    for lang in ["vhdl", "verilog"] {
+    for lang in KNOWN_LANGUAGES {
+        let lang_s = String::from(lang);
         let cfg: ToolLangConfig;
         if let Some(c) = config.get(lang) {
             match c {
@@ -456,17 +443,12 @@ pub fn read_tool_toml(filename: &String, replacements: &HashMap<String, String>)
         } else {
             cfg = ToolLangConfig::new()
         }
-        if lang == "vhdl" {
-            vhdl_cfg = cfg;
-        } else {
-            verilog_cfg = cfg
-        }
+        lang_configs.insert(lang_s, cfg);
     }
 
     ToolConfig {
         common,
-        vhdl: vhdl_cfg,
-        verilog: verilog_cfg,
+        lang_configs: lang_configs,
         exec_before,
         exec_after,
         exec_per_lib,
@@ -731,25 +713,30 @@ pub fn gen_script(
         }
         Some(last_el) => last_el,
     };
-    // get lists per language
-    let mut file_lists_verilog: HashMap<String, Vec<String>> = HashMap::new();
-    let mut file_lists_vhdl: HashMap<String, Vec<String>> = HashMap::new();
+    // get lists per language   lang name     library name
+    let mut file_lists: HashMap<String, HashMap<String, Vec<String>>> = HashMap::new();
     for lib_name in &lib_order {
-        let mut verilog_list: Vec<String> = Vec::new();
-        let mut vhdl_list: Vec<String> = Vec::new();
         for el in &element_list {
             if el.library.eq(lib_name) {
-                if el.language.eq("vhdl") {
-                    if !vhdl_list.contains(&el.filename) {
-                        vhdl_list.push(el.filename.clone())
+                match file_lists.get_mut(&el.language) {
+                    Some(lang_list) => {
+                        match lang_list.get_mut(lib_name) {
+                            Some(lib_list) => {
+                                if !lib_list.contains(&el.filename) {
+                                    lib_list.push(el.filename.clone())
+                                }
+                            }
+                            None => {
+                                lang_list.insert(lib_name.clone(), vec![el.filename.clone()]);
+                            }
+                        };
                     }
-                } else if el.language.eq("verilog") && !verilog_list.contains(&el.filename) {
-                    verilog_list.push(el.filename.clone())
-                }
+                    None => {
+                        file_lists.insert(el.language.clone(), HashMap::from([(lib_name.clone(), vec![el.filename.clone()])]));
+                    }
+                };
             }
         }
-        file_lists_verilog.insert(lib_name.to_string(), verilog_list);
-        file_lists_vhdl.insert(lib_name.to_string(), vhdl_list);
     }
 
     let mut content: Vec<String> = Vec::new();
@@ -764,39 +751,31 @@ pub fn gen_script(
         for entry in &tool_config.exec_per_lib {
             content.push(entry.replace("{library}", &lib_name_to_use));
         }
-        for entry in &tool_config.vhdl.exec_per_lib {
-            content.push(entry.replace("{library}", &lib_name_to_use));
-        }
-        for entry in &tool_config.verilog.exec_per_lib {
-            content.push(entry.replace("{library}", &lib_name_to_use));
+        for lang in KNOWN_LANGUAGES {
+            let lang_s = String::from(lang);
+            if let Some(cfg) = tool_config.lang_configs.get(&lang_s) {
+                for entry in &cfg.exec_per_lib {
+                    content.push(entry.replace("{library}", &lib_name_to_use));
+                }
+            }
         }
     }
     content.push(String::from(""));
 
-    // compile verilog
-    // compile vhdl
-    for lang in ["verilog", "vhdl"] {
+    // compile languages
+    for lang in KNOWN_LANGUAGES {
+        let lang_s = String::from(lang);
         for main_common in &tool_config.common {
-            let single_call: &bool;
-            let lang_commons: &Vec<String>;
-            let per_lib: &Vec<String>;
-            let tmp: Vec<String> = vec![String::from("")];
-            if lang == "vhdl" {
-                single_call = &tool_config.vhdl.single_call;
-                if !tool_config.vhdl.common.is_empty() {
-                    lang_commons = &tool_config.vhdl.common;
-                } else {
-                    lang_commons = &tmp;
+            let mut single_call: &bool = &false;
+            let mut lang_commons: &Vec<String> = &vec![String::from("")];
+            let mut per_lib: &Vec<String> = &Vec::new();
+
+            if let Some(cfg) = tool_config.lang_configs.get(&lang_s) {
+                single_call = &cfg.single_call;
+                if !cfg.common.is_empty() {
+                    lang_commons = &cfg.common;
                 }
-                per_lib = &tool_config.vhdl.per_lib;
-            } else {
-                single_call = &tool_config.verilog.single_call;
-                if !tool_config.verilog.common.is_empty() {
-                    lang_commons = &tool_config.verilog.common;
-                } else {
-                    lang_commons = &tmp;
-                }
-                per_lib = &tool_config.verilog.per_lib;
+                per_lib = &cfg.per_lib;
             }
 
             for lang_common in lang_commons {
@@ -816,19 +795,15 @@ pub fn gen_script(
                 }
                 // options
                 for option in arg_options {
-                    let lang_options =
-                        if lang == "vhdl" {
-                            &tool_config.vhdl.options
-                        } else {
-                            &tool_config.verilog.options
+                    if let Some(lang_config) = tool_config.lang_configs.get(&lang_s) {
+                        if let Some(opt) = lang_config.options.get(option) {
+                            common.push(opt.clone());
+                            if *single_call {
+                                common.push(String::from(" \\"))
+                            } else {
+                                common.push(String::from(" \\\n    "))
+                            }
                         };
-                    if let Some(opt) = lang_options.get(option) {
-                        common.push(opt.clone());
-                        if *single_call {
-                            common.push(String::from(" \\"))
-                        } else {
-                            common.push(String::from(" \\\n    "))
-                        }
                     };
                 }
 
@@ -838,12 +813,11 @@ pub fn gen_script(
                 }
                 for lib_name in &lib_order {
                     let lib_name_to_use = get_lib_name_to_use(&lib_name, &top_lib_name, &use_work);
+                    let hashmap_empty: HashMap<String, Vec<String>> = HashMap::new();
                     let files_empty: Vec<String> = Vec::new();
-                    let files = if lang == "vhdl" {
-                        file_lists_vhdl.get(lib_name).unwrap_or(&files_empty)
-                    } else {
-                        file_lists_verilog.get(lib_name).unwrap_or(&files_empty)
-                    };
+
+                    let lang_files_hm = file_lists.get(&lang_s).unwrap_or(&hashmap_empty);
+                    let files = lang_files_hm.get(lib_name).unwrap_or(&files_empty);
                     if files.is_empty() {
                         continue;
                     }
@@ -1017,55 +991,55 @@ mod tests {
     use crate::{get_toplevels_from_lib, write_json_file};
 
     #[test]
-    fn test_filelist_design_1() {
+    fn test_file_list_design_1() {
         env::set_var("HANNA_ROOT", env::current_dir().unwrap_or(PathBuf::from(".")));
         let json_filename = String::from("files_design_1.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.design_1(rtl)"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        write_json_file(String::from("lib_1"), String::from("lib_1.design_1(rtl)"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename, &vec![]);
         assert_eq!(2, 2);
     }
 
     #[test]
-    fn test_filelist_cfg_testbench_1() {
+    fn test_file_list_cfg_testbench_1() {
         let json_filename = String::from("files_cfg_testbench_1.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_1"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_1"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename, &vec![]);
         assert_eq!(2, 2);
     }
 
     #[test]
-    fn test_filelist_cfg_testbench_2() {
+    fn test_file_list_cfg_testbench_2() {
         let json_filename = String::from("files_cfg_testbench_2.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_2"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_2"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename, &vec![]);
         assert_eq!(2, 2);
     }
 
     #[test]
-    fn test_filelist_cfg_testbench_3() {
+    fn test_file_list_cfg_testbench_3() {
         //env::set_var("RUST_LOG", "TRACE");
         let json_filename = String::from("files_cfg_testbench_3.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_3"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_3"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename, &vec![]);
         assert_eq!(2, 2);
     }
 
     #[test]
-    fn test_filelist_cfg_testbench_4() {
+    fn test_file_list_cfg_testbench_4() {
         //env::set_var("RUST_LOG", "TRACE");
         let json_filename = String::from("files_cfg_testbench_4.json");
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_4"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
+        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_4"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename, &vec![]);
         assert_eq!(2, 2);
     }
 
@@ -1076,8 +1050,7 @@ mod tests {
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        let top_levels = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path,
-                                                &replacements);
+        let _ = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path, &replacements);
         assert_eq!(2, 2);
     }
 
@@ -1088,56 +1061,7 @@ mod tests {
         let libraries_toml_path = String::from("tomls/libraries.toml");
         let tool_toml_path = String::from("tomls/tools/echo.toml");
         let replacements: HashMap<String, String> = HashMap::new();
-        let top_levels = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path,
-                                                &replacements);
-        assert_eq!(2, 2);
-    }
-
-    /*
-    #[test]
-    fn test_cfg_design_doesnt_exist() {
-        //env::set_var("RUST_LOG", "TRACE");
-        let json_filename = String::from("files_cfg_design_doesnt_exist.json");
-        let libraries_toml_path = String::from("tomls/libraries.toml");
-        let tool_toml_path = String::from("tomls/tools/echo.toml");
-        let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_design_doesnt_exist"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
-        assert_eq!(2, 2);
-    }
-
-     */
-
-    fn test_filelist_cfg_testbench_4() {
-        //env::set_var("RUST_LOG", "TRACE");
-        let json_filename = String::from("files_cfg_testbench_4.json");
-        let libraries_toml_path = String::from("tomls/libraries.toml");
-        let tool_toml_path = String::from("tomls/tools/echo.toml");
-        let replacements: HashMap<String, String> = HashMap::new();
-        write_json_file(String::from("lib_1"), String::from("lib_1.cfg_testbench_4"), &libraries_toml_path, &tool_toml_path, &replacements, &json_filename);
-        assert_eq!(2, 2);
-    }
-
-    #[test]
-    fn test_get_toplevels_from_lib() {
-        //env::set_var("RUST_LOG", "TRACE");
-        let lib_name = String::from("lib_1");
-        let libraries_toml_path = String::from("tomls/libraries.toml");
-        let tool_toml_path = String::from("tomls/tools/echo.toml");
-        let replacements: HashMap<String, String> = HashMap::new();
-        let top_levels = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path,
-                                                &replacements);
-        assert_eq!(2, 2);
-    }
-
-    #[test]
-    fn test_get_toplevels_from_lib_ignore() {
-        //env::set_var("RUST_LOG", "TRACE");
-        let lib_name = String::from("lib_ignore");
-        let libraries_toml_path = String::from("tomls/libraries.toml");
-        let tool_toml_path = String::from("tomls/tools/echo.toml");
-        let replacements: HashMap<String, String> = HashMap::new();
-        let top_levels = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path,
-                                                &replacements);
+        let _ = get_toplevels_from_lib(&lib_name, &libraries_toml_path, &tool_toml_path, &replacements);
         assert_eq!(2, 2);
     }
 

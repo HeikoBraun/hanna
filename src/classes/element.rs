@@ -6,7 +6,6 @@ pub struct Element {
 
 
 impl Element {
-    /*
     pub fn copy(&self) -> Element {
         Element {
             library: self.library.clone(),
@@ -14,7 +13,6 @@ impl Element {
             language: self.language.clone(),
         }
     }
-    */
 }
 
 

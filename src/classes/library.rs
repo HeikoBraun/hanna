@@ -31,10 +31,8 @@ pub struct Library {
     pub modules: HashMap<String, String>,
     pub depends_on_libs: Vec<String>,
     pub ignore: bool,
-    pub vhdl_scope: Vec<String>,
-    pub verilog_scope: Vec<String>,
-    pub all_vhdl_elements: Vec<Element>,
-    pub all_verilog_elements: Vec<Element>,
+    pub scopes: HashMap<String, Vec<String>>,
+    pub all_elements: HashMap<String, Vec<Element>>,
 }
 /*
 impl Default for Library {
@@ -55,10 +53,8 @@ impl Library {
             modules: HashMap::new(),
             depends_on_libs: Vec::new(),
             ignore: false,
-            vhdl_scope: Vec::new(),
-            verilog_scope: Vec::new(),
-            all_vhdl_elements: Vec::new(),
-            all_verilog_elements: Vec::new(),
+            scopes: Vec::new(),
+            all_elements: Vec::new(),
         }
     }
     */
@@ -144,57 +140,45 @@ impl Library {
             return;
         }
         info!("Analyzing library {} ....", self.name);
-        let mut used_filenames: HashSet<String> = HashSet::new();
-        for pattern in self.vhdl_scope.clone() {
-            info!("Searching with glob pattern '{}'", pattern);
+        for lang in KNOWN_LANGUAGES {
+            let lang_s = String::from(lang);
+            let mut used_filenames: HashSet<String> = HashSet::new();
             let mut found = false;
-            for entry in glob(&pattern).expect("Failed to read glob pattern") {
-                match entry {
-                    Ok(path) => {
-                        if let Some(filename) = path.to_str() {
-                            if !used_filenames.contains(filename) {
-                                used_filenames.insert(filename.to_string());
-                                self.all_vhdl_elements.push(Element {
-                                    library: self.name.clone(),
-                                    filename: filename.to_string(),
-                                    language: String::from("vhdl"),
-                                });
-                                self.analyze_vhdl_file(filename);
-                                found = true;
-                            } else {
-                                trace!("Ignoring duplicate glob entry {}", filename);
-                            }
-                        }
-                    }
-                    Err(e) => error!("{:?}", e),
-                }
-            }
-            if !found {
-                info!("    no files found!");
-            }
-        }
+            let empty_scope: Vec<String> = Vec::new();
+            let scope = self.scopes.get(&lang_s).unwrap_or(&empty_scope).clone();
+            for pattern in scope {
+                info!("Searching with glob pattern '{}' for {}", pattern, lang);
+                for entry in glob(&pattern).expect("Failed to read glob pattern") {
+                    match entry {
+                        Ok(path) => {
+                            if let Some(filename) = path.to_str() {
+                                if !used_filenames.contains(filename) {
+                                    used_filenames.insert(filename.to_string());
 
-        let mut used_filenames: HashSet<String> = HashSet::new();
-        for pattern in self.verilog_scope.clone() {
-            info!("Searching with glob pattern '{}'", pattern);
-            for entry in glob(&pattern).expect("Failed to read glob pattern") {
-                match entry {
-                    Ok(path) => {
-                        if let Some(filename) = path.to_str() {
-                            if !used_filenames.contains(filename) {
-                                used_filenames.insert(filename.to_string());
-                                self.all_verilog_elements.push(Element {
-                                    library: self.name.clone(),
-                                    filename: filename.to_string(),
-                                    language: String::from("vhdl"),
-                                });
-                                self.analyze_verilog_file(filename)
-                            } else {
-                                trace!("Ignoring duplicate glob entry {}", filename);
+                                    self.all_elements.get_mut(&lang_s).unwrap_or(&mut Vec::new()).push(Element {
+                                        library: self.name.clone(),
+                                        filename: filename.to_string(),
+                                        language: lang_s.clone(),
+                                    });
+                                    match lang {
+                                        "vhdl" => self.analyze_vhdl_file(filename),
+                                        "verilog" | "systemverilog" => self.analyze_verilog_file(filename),
+                                        _ => {
+                                            error!("142590864");
+                                            exit(1);
+                                        }
+                                    }
+                                    found = true;
+                                } else {
+                                    trace!("Ignoring duplicate glob entry {}", filename);
+                                }
                             }
                         }
+                        Err(e) => error!("{:?}", e),
                     }
-                    Err(e) => error!("{:?}", e),
+                }
+                if !found {
+                    info!("    no files found!");
                 }
             }
         }
