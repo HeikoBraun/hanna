@@ -142,12 +142,13 @@ fn main() {
     //let libraries = read_libraries_toml(&args.libraries, &replacements, &tool_toml);
     let lib_name: String;
 
+    let toplevel = args.toplevel.to_lowercase();
     if args.command == "info" {
-        lib_name = args.toplevel.clone();
+        lib_name = toplevel.clone();
     } else {
-        match RE_ENT.captures(&args.toplevel) {
+        match RE_ENT.captures(&toplevel) {
             None => {
-                error!("No valid search pattern: {}", args.toplevel);
+                error!("No valid search pattern: {}", toplevel);
                 exit(1)
             }
             Some(caps) => {
@@ -192,16 +193,16 @@ fn main() {
         _ => {
             match args.command.as_str() {
                 "files" => {
-                    write_lib_lists(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_libraries);
+                    write_lib_lists(lib_name, toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_libraries);
                 }
                 "json" => {
-                    write_json_file(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_libraries);
+                    write_json_file(lib_name, toplevel, &args.libraries, &args.tool, &replacements, &args.filename, &args.ignore_libraries);
                 }
                 "script" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_libraries, &args.options);
+                    gen_script(lib_name, toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_libraries, &args.options);
                 }
                 "execute" => {
-                    gen_script(lib_name, args.toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_libraries, &args.options);
+                    gen_script(lib_name, toplevel, &args.libraries, &args.tool, &replacements, &args.filename, args.use_work, &args.ignore_libraries, &args.options);
                     run_script(&args.filename);
                 }
                 _ => {
